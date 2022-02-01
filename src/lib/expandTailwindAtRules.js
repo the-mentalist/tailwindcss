@@ -131,61 +131,6 @@ function buildStylesheet(rules, context) {
 }
 
 /**
- *
- * @param {import('postcss').Document} doc
- * @param {Record<"base" | "components" | "utilities" | "variants", import('postcss').Node | null>} layerNodes
- */
-function findRootInDocument(doc, layerNodes) {
-  // We only append variants to the end of the tree if there's no explicit variants node.
-  // In which case we don't need to worry about this
-  if (layerNodes.variants !== null) {
-    return doc
-  }
-
-  // The ideal solution would be to use the `.root()` on the utility
-  // or component nodes. However we cannot rely on that actually
-  // pointing to the root node. Sometimes it'll point to the
-  // tailwind at-rule itself — so we have to do extra work.
-
-  // We need to find the root node associated with the tailwind rules.
-  // However, it is *possible* that the nodes are split across
-  // multiple roots in the same document (though unlikely)
-
-  // Given that there can be multiple roots we will find all
-  // of the ones that are associated with the tailwind rules.
-  let roots = doc.nodes.filter((node) => {
-    if (node.type !== 'root') {
-      return false
-    }
-
-    if (layerNodes.components !== null && node.index(layerNodes.components) !== -1) {
-      return true
-    }
-
-    if (layerNodes.utilities !== null && node.index(layerNodes.utilities) !== -1) {
-      return true
-    }
-
-    return false
-  })
-
-  // And pick the last one if it exists since
-  // this is most likely the one we will want
-  let root = roots[roots.length - 1]
-
-  if (!root) {
-    log.warn('postcss-document-root-missing', [
-      `Your project is using PostCSS Document nodes however Tailwind CSS was unable to find the root node.`,
-      `Variants may be appended to the end of the document instead of where you expect them. Please open an issue with a reproduction!`,
-    ])
-
-    return doc
-  }
-
-  return root
-}
-
-/**
  * @returns {(root: import('postcss').Root | import('postcss').Document) => void}
  */
 export default function expandTailwindAtRules(context) {
@@ -211,13 +156,6 @@ export default function expandTailwindAtRules(context) {
 
     if (Object.values(layerNodes).every((n) => n === null)) {
       return root
-    }
-
-    // ---
-
-    // Experiemntal PostCSS document node support
-    if (root.type === 'document') {
-      root = findRootInDocument(root, layerNodes)
     }
 
     // ---
