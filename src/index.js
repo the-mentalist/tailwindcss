@@ -24,12 +24,10 @@ module.exports = function tailwindcss(configOrPath) {
             }
           }
 
-          return root
+          return
         }
 
         processTailwindFeatures(context)(root, result)
-
-        return root
       },
       env.DEBUG &&
         function (root) {
