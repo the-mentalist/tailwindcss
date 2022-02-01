@@ -130,9 +130,6 @@ function buildStylesheet(rules, context) {
   return returnValue
 }
 
-/**
- * @returns {(root: import('postcss').Root | import('postcss').Document) => void}
- */
 export default function expandTailwindAtRules(context) {
   return (root) => {
     let layerNodes = {
