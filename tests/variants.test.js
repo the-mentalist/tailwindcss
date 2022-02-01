@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import postcss from 'postcss'
 
 import { run, css, html, defaults } from './util/run'
 
@@ -535,6 +536,36 @@ it('variants for utilities should not be produced in a file without a utilities 
             max-width: 1536px;
           }
         }
+      }
+    `)
+  })
+})
+
+fit('appends variants to the correct place when using postcss documents', () => {
+  let config = {
+    content: [{ raw: html`<div class="underline sm:underline"></div>` }],
+  }
+
+  const doc = postcss.document()
+  doc.append(postcss.parse(`a {}`))
+  doc.append(postcss.parse(`@tailwind utilities`))
+  doc.append(postcss.parse(`b {}`))
+
+  const result = doc.toResult()
+
+  return run(result, config).then((result) => {
+    return expect(result.css).toMatchFormattedCss(css`
+      a {
+      }
+      .underline {
+        text-decoration-line: underline;
+      }
+      @media (min-width: 640px) {
+        .sm\:underline {
+          text-decoration-line: underline;
+        }
+      }
+      b {
       }
     `)
   })
