@@ -13,7 +13,16 @@ module.exports = function tailwindcss(configOrPath) {
           return root
         },
       function (root, result) {
-        processTailwindFeatures(setupTrackingContext(configOrPath))(root, result)
+        let context = setupTrackingContext(configOrPath)
+
+        let roots = root.type === 'document'
+          ? root.nodes.filter(node => node.type === 'root')
+          : [root]
+
+        // Process each root node separately like it was it's own CSS file
+        for (const root of roots) {
+          processTailwindFeatures(context)(root, result)
+        }
       },
       env.DEBUG &&
         function (root) {

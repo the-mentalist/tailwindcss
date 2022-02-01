@@ -11,25 +11,8 @@ import detectNesting from './lib/detectNesting'
 import { createContext } from './lib/setupContextUtils'
 import { issueFlagNotices } from './featureFlags'
 
-function processDocument(setupContext) {
-  const plugin = processTailwindFeatures(setupContext)
-
-  return function (doc, result) {
-    for (const root of doc.nodes) {
-      // Process each root node separately like it was it's own CSS file
-      if (root.type === 'root') {
-        plugin(root, result)
-      }
-    }
-  }
-}
-
 export default function processTailwindFeatures(setupContext) {
   return function (root, result) {
-    if (root.type === 'document') {
-      return processDocument(setupContext)(root, result)
-    }
-
     let { tailwindDirectives, applyDirectives } = normalizeTailwindDirectives(root)
 
     detectNesting()(root, result)
