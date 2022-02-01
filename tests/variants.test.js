@@ -544,10 +544,13 @@ it('variants for utilities should not be produced in a file without a utilities 
 fit('appends variants to the correct place when using postcss documents', () => {
   let config = {
     content: [{ raw: html`<div class="underline sm:underline"></div>` }],
+    plugins: [],
+    corePlugins: { preflight: false },
   }
 
   const doc = postcss.document()
   doc.append(postcss.parse(`a {}`))
+  doc.append(postcss.parse(`@tailwind base`))
   doc.append(postcss.parse(`@tailwind utilities`))
   doc.append(postcss.parse(`b {}`))
 
@@ -557,6 +560,7 @@ fit('appends variants to the correct place when using postcss documents', () => 
     return expect(result.css).toMatchFormattedCss(css`
       a {
       }
+      ${defaults}
       .underline {
         text-decoration-line: underline;
       }
